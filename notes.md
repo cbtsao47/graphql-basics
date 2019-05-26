@@ -24,3 +24,13 @@ name: String!
 Every field inside the basic root types (query,mutation,subscribtion) is called a root field
 
 ! and [] are called type modifiers
+
+Resolvers
+
+Link: {
+id: parent => parent.id,
+description: parent => parent.description,
+url: parent => parent.url
+}
+
+- the parent (sometimes root) is the result of the previous resolver execution level
