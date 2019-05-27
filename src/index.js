@@ -1,57 +1,53 @@
 const { GraphQLServer } = require("graphql-yoga");
-// dummy data
-let links = [
-  {
-    id: "link-0",
-    url: "www.howtographql.com",
-    description: "Fullstack tutorial for GraphQL"
-  }
-];
-let idCount = links.length;
+const { prisma } = require("./generated/prisma-client");
+
 const resolvers = {
   Query: {
     info: () => `This is the API of hackernews Clone`,
-    feed: () => links,
-    link: (parent, args) => {
-      const selection = links.find(link => link.id === args.id);
-      console.log(links);
-      return selection;
+    feed: (root, args, context, info) => {
+      console.log(context);
+      return context.prisma.links();
     }
   },
   Mutation: {
-    post: (parent, args) => {
-      const link = {
-        id: `link-${idCount++}`,
-        description: args.description,
-        url: args.url
-      };
-      links.push(link);
-      return link;
-    },
-    updateLink: (parent, args) => {
-      console.log("test", parent);
-      const update = {
-        id: args.id,
-        description: args.description,
-        url: args.url
-      };
-      links = links.map(link => {
-        if (link.id === update.id) {
-          return update;
-        }
-        return link;
+    post: (root, { url, description }, context, info) => {
+      return context.prisma.createLink({
+        url: url,
+        description: description
       });
-      return update;
     },
-    deleteLink: (parent, args) => {
-      links = links.filter(link => link.id !== args.id);
-      return null;
+    updateLink: (root, { id, url, description }, context, info) => {
+      return context.prisma.updateLink({
+        where: { id: id },
+        data: {
+          url: url,
+          description: description
+        }
+      });
+    },
+    deleteLink: (root, { id }, context, info) => {
+      return context.prisma.deleteLink({ id });
     }
   }
 };
+async function main() {
+  const newLink = await prisma.createLink({
+    url: "www.prisma.io",
+    description: "Prisma replaces traditional ORMs"
+  });
+  const allLinks = await prisma.links();
+  console.log(allLinks);
+}
+main().catch(e => console.error(e));
 const server = new GraphQLServer({
   typeDefs: "./src/schema.graphql",
-  resolvers
+  resolvers,
+  context: request => {
+    return {
+      ...request,
+      prisma
+    };
+  }
 });
 
 server.start(() => console.log(`Server is running on port 4000`));
