@@ -5,11 +5,16 @@ const Query = require("./resolvers/Query");
 const Mutation = require("./resolvers/Mutation");
 const User = require("./resolvers/User");
 const Link = require("./resolvers/Link");
+const Subscription = require("./resolvers/Subscription");
+const Vote = require("./resolvers/Vote");
+
 const resolvers = {
   Query,
   Mutation,
   User,
-  Link
+  Link,
+  Subscription,
+  Vote
   // Query: {
   //   info: () => `This is the API of hackernews Clone`,
   //   feed: (root, args, context, info) => {
@@ -38,15 +43,14 @@ const resolvers = {
   //   }
   // }
 };
-async function main() {
-  const newLink = await prisma.createLink({
-    url: "www.prisma.io",
-    description: "Prisma replaces traditional ORMs"
-  });
-  const allLinks = await prisma.links();
-  console.log(allLinks);
-}
-main().catch(e => console.error(e));
+// async function main() {
+//   const newLink = await prisma.createLink({
+//     url: "www.prisma.io",
+//     description: "Prisma replaces traditional ORMs"
+//   });
+//   const allLinks = await prisma.links();
+// }
+// main().catch(e => console.error(e));
 const server = new GraphQLServer({
   typeDefs: "./src/schema.graphql",
   resolvers,
